@@ -15,6 +15,8 @@
     ];
   };
 
+  security.sudo.wheelNeedsPassword = false;
+
   services.openssh.enable = true;
   services.openssh.ports = [ 2273 ];
 
