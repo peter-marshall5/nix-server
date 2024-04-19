@@ -6,7 +6,7 @@
 
   fileSystems = {
     "/" = {
-      device = "/dev/disk/by-partlabel/nixos";
+      device = "/dev/disk/by-partlabel/nixos1:/dev/disk/by-partlabel/nixos2";
       fsType = "bcachefs";
       options = [ "compression=zstd" ];
     };
