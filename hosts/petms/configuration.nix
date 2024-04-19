@@ -26,16 +26,19 @@
 
   boot.loader.systemd-boot.enable = true;
 
-  boot.kernelParams = [ "console=ttyS0" ];
-
   boot.enableContainers = true;
 
   containers.dev = {
     autoStart = true;
     config = { config, lib, pkgs, ... }: {
+      services.openssh.enable = true;
+      services.openssh.ports = [ 2274 ];
       users.users.petms = {
         isNormalUser = true;
         extraGroups = [ "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjg1Y1b2YyhoC73I4is0/NRmVb3FeRmpLf2Yk8adrxq petms@peter-pc"
+        ];
       };
       system.stateVersion = "24.05";
     };
@@ -56,7 +59,6 @@
 
   containers.router = {
     autoStart = true;
-    privateNetwork = true;
     config = { config, lib, pkgs, ... }: {
       services.i2pd = {
         enable = true;
@@ -73,8 +75,6 @@
   containers.torrent = {
     autoStart = true;
     privateNetwork = true;
-    hostBridge = "ibr0";
-    localAddress = "10.102.1.2";
     config = { config, lib, pkgs, ... }: {
       imports = [ ../../modules/services/qbittorrent.nix ];
       services.qbittorrent = {
@@ -83,9 +83,15 @@
       };
       system.stateVersion = "24.05";
     };
+    extraVeths."int1" = {
+      hostBridge = "ibr0";
+      localAddress = "10.102.1.2";
+    };
   };
 
   networking.bridges."ibr0".interfaces = [];
+
+  networking.firewall.allowedTCPPorts = [ 2273 2274 ];
 
   system.stateVersion = "24.05";
 

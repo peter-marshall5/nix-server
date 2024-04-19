@@ -1,4 +1,4 @@
-{ config, modulesPath, ... }: {
+{ config, pkgs, modulesPath, ... }: {
 
   imports = [
     (modulesPath + "/profiles/minimal.nix")
@@ -9,6 +9,15 @@
 
   boot.loader.grub.enable = false;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  systemd.sleep.extraConfig = ''
+    AllowSuspend=no
+    AllowHibernation=no
+  '';
+
+  services.logind.lidSwitch = "ignore";
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

@@ -12,12 +12,10 @@
     };
 
     deploy.nodes.petms = {
-      hostname = "opcc.opcc.tk";
+      hostname = "petms";
       remoteBuild = false;
       profiles.system = {
-        sshUser = "admin";
-        sshOpts = [ "-p" "2273" ];
-        user = "root";
+        sshUser = "root";
         path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.petms;
       };
     };
