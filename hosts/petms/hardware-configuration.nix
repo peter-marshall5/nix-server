@@ -1,6 +1,6 @@
 { modulesPath, ... }: {
 
-  boot.initrd.kernelModules = [ "usb_storage" "uas" "ahci" ];
+  boot.initrd.kernelModules = [ "usb_storage" "uas" "ahci" "xhci_pci" "ehci_pci" "sd_mod" ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
