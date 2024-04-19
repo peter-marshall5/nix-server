@@ -5,7 +5,7 @@
     ./services/upnp.nix
   ];
 
-  boot.initrd.systemd.enable = true;
+  boot.initrd.systemd.enable = false;
 
   boot.loader.grub.enable = false;
   boot.loader.efi.canTouchEfiVariables = true;
