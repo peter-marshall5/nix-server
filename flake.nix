@@ -2,12 +2,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     deploy-rs.url = "github:serokell/deploy-rs";
+    agenix.url = "github:ryantm/agenix";
   };
-  outputs = { self, nixpkgs, deploy-rs }: {
+  outputs = { self, nixpkgs, deploy-rs, agenix }: {
     nixosConfigurations.petms = nixpkgs.lib.nixosSystem {
       modules = [
         ./modules
         ./hosts/petms/configuration.nix
+        agenix.nixosModules.default
       ];
     };
 

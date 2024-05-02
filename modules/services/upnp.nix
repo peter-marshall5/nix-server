@@ -40,6 +40,14 @@ in {
       };
     };
 
+    systemd.timers."upnpc" = {
+      wantedBy = [ "multi-user.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Unit = "upnpc.service";
+      };
+    };
+
     networking.firewall = lib.mkIf cfg.openFirewall {
       allowedUDPPorts = [ 1900 ];
       allowedUDPPortRanges = [{ from = 32768; to = 61000; }];

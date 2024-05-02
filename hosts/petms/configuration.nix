@@ -26,6 +26,27 @@
 
   boot.loader.systemd-boot.enable = true;
 
+  age.secrets.rclone.file = ../../secrets/rclone.age;
+  age.secrets.backup-password.file = ../../secrets/backup-password.age;
+
+  services.restic.backups.main = {
+    rcloneConfigFile = config.age.secrets.rclone.path;
+    repository = "rclone:onedrive:backups/petms";
+    initialize = true;
+    paths = [
+      "/home"
+      "/var"
+    ];
+    passwordFile = config.age.secrets.backup-password.path;
+    timerConfig = {
+      OnCalendar = "00:05";
+      RandomizedDelaySec = "2h";
+    };
+    rcloneOptions = {
+      log-level = "debug";
+    };
+  };
+
   boot.enableContainers = true;
 
   containers.dev = {
@@ -72,22 +93,22 @@
     };
   };
 
-  containers.torrent = {
-    autoStart = true;
-    privateNetwork = true;
-    config = { config, lib, pkgs, ... }: {
-      imports = [ ../../modules/services/qbittorrent.nix ];
-      services.qbittorrent = {
-        package = pkgs.qbittorrent-nox;
-        webuiPort = 8080;
-      };
-      system.stateVersion = "24.05";
-    };
-    extraVeths."int1" = {
-      hostBridge = "ibr0";
-      localAddress = "10.102.1.2";
-    };
-  };
+  # containers.torrent = {
+  #   autoStart = true;
+  #   privateNetwork = true;
+  #   config = { config, lib, pkgs, ... }: {
+  #     imports = [ ../../modules/services/qbittorrent.nix ];
+  #     services.qbittorrent = {
+  #       package = pkgs.qbittorrent-nox;
+  #       webuiPort = 8080;
+  #     };
+  #     system.stateVersion = "24.05";
+  #   };
+  #   extraVeths."int1" = {
+  #     hostBridge = "ibr0";
+  #     localAddress = "10.102.1.2";
+  #   };
+  # };
 
   networking.bridges."ibr0".interfaces = [];
 
