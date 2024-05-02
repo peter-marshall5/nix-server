@@ -29,25 +29,49 @@
   age.secrets.rclone.file = ../../secrets/rclone.age;
   age.secrets.backup-password.file = ../../secrets/backup-password.age;
 
-  services.restic.backups.main = {
-    rcloneConfigFile = config.age.secrets.rclone.path;
-    repository = "rclone:onedrive:backups/petms";
-    initialize = true;
-    paths = [
-      "/home"
-      "/var"
-    ];
-    passwordFile = config.age.secrets.backup-password.path;
-    timerConfig = {
-      OnCalendar = "00:05";
-      RandomizedDelaySec = "2h";
-    };
-    rcloneOptions = {
-      log-level = "debug";
-    };
-  };
+  # services.restic.backups.main = {
+  #   rcloneConfigFile = config.age.secrets.rclone.path;
+  #   repository = "rclone:onedrive:backups/petms";
+  #   initialize = true;
+  #   paths = [
+  #     "/home"
+  #     "/var"
+  #   ];
+  #   passwordFile = config.age.secrets.backup-password.path;
+  #   timerConfig = {
+  #     OnCalendar = "00:05";
+  #     RandomizedDelaySec = "2h";
+  #   };
+  #   rcloneOptions = {
+  #     log-level = "debug";
+  #   };
+  # };
 
   boot.enableContainers = true;
+
+  containers.vault = {
+    autoStart = true;
+    config = { config, lib, pkgs, ... }: {
+      users.users.petms = {
+        isNormalUser = true;
+        extraGroups = [ "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAi/FBbtRWsSbEX5iyqtzFXs5qgDi3DANUkwromz9m85 root@peter-pc"
+        ];
+      };
+      services.openssh.enable = true;
+      services.openssh.ports = [ 2272 ];
+      services.openssh.extraConfig = ''
+        PermitTTY no
+        PermitTunnel no
+        AllowAgentForwarding no 
+        AllowTcpForwarding no
+        X11Forwarding no
+        ForceCommand internal-sftp 
+      '';
+      system.stateVersion = "24.05";
+    };
+  };
 
   containers.dev = {
     autoStart = true;
@@ -112,7 +136,7 @@
 
   networking.bridges."ibr0".interfaces = [];
 
-  networking.firewall.allowedTCPPorts = [ 2273 2274 ];
+  networking.firewall.allowedTCPPorts = [ 2272 2273 2274 ];
 
   system.stateVersion = "24.05";
 
