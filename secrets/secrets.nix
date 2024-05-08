@@ -6,4 +6,5 @@ in
 {
   "rclone.age".publicKeys = keysFor ["petms"];
   "backup-password.age".publicKeys = keysFor ["petms"];
+  "wg.age".publicKeys = keysFor ["petms"];
 }
