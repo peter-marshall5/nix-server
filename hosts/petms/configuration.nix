@@ -36,12 +36,7 @@
     ips = [ "10.100.0.1/24" ];
     listenPort = 25565;
     privateKeyFile = config.age.secrets.wg.path;
-    peers = [
-      { # Phone
-        publicKey = "qnXuHWI3HUpLw+fxbVkvUiY0Enz7v36EdHAyrH45U0A=";
-        allowedIPs = [ "10.100.0.2/32" ];
-      }
-    ];
+    peers = import ./wg-peers.nix;
   };
 
   virtualisation.podman.enable = true;
@@ -50,6 +45,21 @@
   programs.bash.promptInit = ''
     PS1="\n\[\033[1;32m\]\u@\h:\w\[\033[36m\]\$\[\033[0m\] "
   '';
+
+  age.secrets.cloudflared.file = ../../secrets/06cafcb6-9210-469b-bfff-42397ef69ce3.json.age;
+
+  services.cloudflared.enable = true;
+  services.cloudflared.tunnels = {
+    "06cafcb6-9210-469b-bfff-42397ef69ce3" = {
+      credentialsFile = config.age.secrets.cloudflared.path;
+      default = "http_status:404";
+      ingress = {
+        "cheesecake.opcc.tk" = {
+          service = "ssh://localhost:22";
+        };
+      };
+    };
+  };
 
   system.stateVersion = "24.05";
 
