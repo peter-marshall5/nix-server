@@ -5,6 +5,10 @@
     ./services/upnp.nix
   ];
 
+  nixpkgs.overlays = [ (final: prev: {
+    qemu_kvm = prev.qemu_test;
+  }) ];
+
   boot.initrd.systemd.enable = false;
 
   boot.loader.grub.enable = false;

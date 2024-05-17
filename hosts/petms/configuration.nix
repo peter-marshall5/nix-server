@@ -3,21 +3,14 @@
   imports = [
     ./hardware-configuration.nix
     ./mc.nix
-    ./vault.nix
   ];
 
-  networking.hostName = "petms";
+  networking.hostName = "cheesecake";
   networking.domain = "opcc.tk";
 
-  users.users.admin = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjg1Y1b2YyhoC73I4is0/NRmVb3FeRmpLf2Yk8adrxq petms@peter-pc"
-    ];
-  };
-
   security.sudo.wheelNeedsPassword = false;
+
+  users.users = import ./users.nix;
 
   services.openssh.enable = true;
   services.openssh.ports = [ 2273 ];
@@ -29,12 +22,6 @@
   boot.loader.systemd-boot.enable = true;
 
   boot.enableContainers = true;
-
-  containers.petms-dev = {
-    autoStart = true;
-    privateNetwork = true;
-    config = import ../dev/configuration.nix;
-  };
 
   networking.nat.enable = true;
   networking.nat.externalInterface = "enp2s0f1";
@@ -56,6 +43,13 @@
       }
     ];
   };
+
+  virtualisation.podman.enable = true;
+  virtualisation.podman.dockerCompat = true;
+
+  programs.bash.promptInit = ''
+    PS1="\n\[\033[1;32m\]\u@\h:\w\[\033[36m\]\$\[\033[0m\] "
+  '';
 
   system.stateVersion = "24.05";
 

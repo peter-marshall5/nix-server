@@ -1,7 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-    deploy-rs.url = "github:serokell/deploy-rs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     agenix.url = "github:ryantm/agenix";
   };
   outputs = { self, nixpkgs, deploy-rs, agenix }: {
@@ -11,15 +10,6 @@
         ./hosts/petms/configuration.nix
         agenix.nixosModules.default
       ];
-    };
-
-    deploy.nodes.petms = {
-      hostname = "petms";
-      remoteBuild = false;
-      profiles.system = {
-        sshUser = "root";
-        path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.petms;
-      };
     };
   };
 }
