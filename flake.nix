@@ -4,10 +4,10 @@
     agenix.url = "github:ryantm/agenix";
   };
   outputs = { self, nixpkgs, agenix }: {
-    nixosConfigurations.petms = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.cheesecake = nixpkgs.lib.nixosSystem {
       modules = [
         ./modules
-        ./hosts/petms/configuration.nix
+        ./hosts/cheesecake/configuration.nix
         agenix.nixosModules.default
       ];
     };
