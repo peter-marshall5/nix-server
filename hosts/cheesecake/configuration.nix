@@ -46,7 +46,10 @@
     PS1="\n\[\033[1;32m\]\u@\h:\w\[\033[36m\]\$\[\033[0m\] "
   '';
 
-  age.secrets.cloudflared.file = ../../secrets/06cafcb6-9210-469b-bfff-42397ef69ce3.json.age;
+  age.secrets.cloudflared = {
+    file = ../../secrets/06cafcb6-9210-469b-bfff-42397ef69ce3.json.age;
+    owner = "cloudflared";
+  };
 
   services.cloudflared.enable = true;
   services.cloudflared.tunnels = {
