@@ -13,7 +13,7 @@
   users.users = import ./users.nix;
 
   services.openssh.enable = true;
-  services.openssh.ports = [ 2273 ];
+  services.openssh.openFirewall = false;
 
   services.upnpc.enable = true;
 
@@ -26,9 +26,9 @@
   networking.nat.enable = true;
   networking.nat.externalInterface = "enp2s0f1";
   networking.nat.internalInterfaces = [ "wg0" ];
-  networking.firewall = {
-    allowedUDPPorts = [ 25565 ];
-  };
+
+  networking.firewall.allowedUDPPorts = [ 25565 ];
+  networking.firewall.interfaces."wg0".allowedTCPPorts = [ 22 ];
 
   age.secrets.wg.file = ../../secrets/wg.age;
 
