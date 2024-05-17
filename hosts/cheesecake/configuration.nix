@@ -64,6 +64,10 @@
     };
   };
 
+  services.openssh.settings.Macs = [
+    "hmac-sha2-512"
+  ];
+
   system.stateVersion = "24.05";
 
 }
