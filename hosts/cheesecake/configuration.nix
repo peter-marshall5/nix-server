@@ -2,7 +2,6 @@
 
   imports = [
     ./hardware-configuration.nix
-    ./mc.nix
   ];
 
   networking.hostName = "cheesecake";
@@ -14,6 +13,14 @@
 
   services.openssh.enable = true;
   services.openssh.openFirewall = false;
+
+  environment.etc."ssh/ca.pub".text = ''
+    ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBN6wnMAe+DI5VQXfqlII/fAYCI0AMTz7T9CrH0QM14199qbsKMm1nmHe+ai/PPjK4d2OT0p3fC+rEXPy5gIFL3w= open-ssh-ca@cloudflareaccess.org
+  '';
+
+  services.openssh.extraConfig = ''
+    TrustedUserCAKeys /etc/ssh/ca.pub
+  '';
 
   services.upnpc.enable = true;
 
