@@ -14,6 +14,9 @@
   boot.loader.grub.enable = false;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  services.openssh.authorizedKeysInHomedir = false;
+  users.mutableUsers = false;
+
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   systemd.sleep.extraConfig = ''
