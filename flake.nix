@@ -3,13 +3,27 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     agenix.url = "github:ryantm/agenix";
   };
-  outputs = { self, nixpkgs, agenix }: {
-    nixosConfigurations.cheesecake = nixpkgs.lib.nixosSystem {
-      modules = [
-        ./modules
-        ./hosts/cheesecake/configuration.nix
-        agenix.nixosModules.default
-      ];
+  outputs = { self, nixpkgs, agenix }: let
+    hostPkgs = nixpkgs.legacyPackages."x86_64-linux";
+  in {
+    apps.x86_64-linux.pihole-net = let
+      sys = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./modules
+          ./hosts/pihole-net/configuration.nix
+        ];
+      };
+      build = sys.config.system.build;
+      runner = hostPkgs.writers.writeBash "run-pixiecore" ''
+        exec ${hostPkgs.pixiecore}/bin/pixiecore \
+          boot ${build.kernel}/bzImage ${build.netbootRamdisk}/initrd \
+          --cmdline "init=${build.toplevel}/init loglevel=4" \
+          --debug --dhcp-no-bind \
+          --port 64172 --status-port 64172 "$@"
+      '';
+    in {
+      type = "app";
+      program = "${runner}";
     };
   };
 }
