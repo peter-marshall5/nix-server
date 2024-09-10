@@ -9,7 +9,6 @@
     apps.x86_64-linux.pihole-net = let
       sys = nixpkgs.lib.nixosSystem {
         modules = [
-          ./modules
           ./hosts/pihole-net/configuration.nix
         ];
       };
@@ -25,5 +24,18 @@
       type = "app";
       program = "${runner}";
     };
+    nixosConfigurations.hypervisor-m = nixpkgs.lib.nixosSystem {
+      modules = [
+        ./hosts/hypervisor-m/configuration.nix
+      ];
+    };
+    checks.x86_64-linux.hypervisor = (import ./tests/hypervisor.nix {
+      pkgs = nixpkgs.legacyPackages."x86_64-linux";
+      inherit self;
+    }).test;
+    packages.x86_64-linux.test-system = (import ./tests/hypervisor.nix {
+      pkgs = nixpkgs.legacyPackages."x86_64-linux";
+      inherit self;
+    }).diskImage;
   };
 }

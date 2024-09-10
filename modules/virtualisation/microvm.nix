@@ -1,4 +1,6 @@
+{
 
+  options.virtualisation.microvms
 
     ${qemu}/bin/qemu-kvm \
       -m "$mem" -smp "$cpus" \

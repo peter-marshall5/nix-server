@@ -1,9 +1,4 @@
-{ config, pkgs, modulesPath, ... }: {
-
-  imports = [
-    ./services/upnp.nix
-    # ./vm-bundle.nix
-  ];
+{ config, pkgs, ... }: {
 
   services.openssh.authorizedKeysInHomedir = false;
   users.mutableUsers = false;
@@ -17,9 +12,5 @@
   systemd.services."serial-getty@hvc0".enable = false;
   systemd.services."getty@tty1".enable = false;
   systemd.services."autovt@".enable = false;
-
-  # environment.systemPackages = with pkgs; [
-  #   kmod
-  # ];
 
 }

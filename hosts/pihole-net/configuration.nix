@@ -9,7 +9,12 @@
     (modulesPath + "/profiles/perlless.nix")
   ];
 
-  netboot.squashfsCompression = "zstd -Xcompression-level 12";
+  netboot.squashfsCompression = "zstd -Xcompression-level 12 -b 1M";
+
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = [ "-8" ];
+
+  networking.hostName = "pihole";
 
   virtualisation.oci-containers.containers.pihole = {
     image = "docker.io/pihole/pihole:latest";
@@ -31,6 +36,7 @@
       "etc-dnsmasq.d:/etc/dnsmasq.d"
     ];
     extraOptions = [ "--cap-add=CAP_NET_ADMIN" "--net=slirp4netns" "--dns=127.0.0.1" "--dns=1.1.1.1" ];
+    hostname = "pihole";
   };
 
   networking.firewall.enable = false;
@@ -61,6 +67,13 @@
 
   hardware.cpu.intel.updateMicrocode = true;
   hardware.cpu.amd.updateMicrocode = true;
+
+  services.logind.lidSwitch = "ignore";
+
+  systemd.sleep.extraConfig = ''
+    AllowSuspend=no
+    AllowHibernation=no
+  '';
 
   system.stateVersion = "24.05";
 
