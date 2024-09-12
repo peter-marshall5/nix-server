@@ -115,7 +115,7 @@
     };
   };
 
-  environment.etc."qemu/bridge.conf".text = "";
+  environment.etc."qemu/bridge.conf".text = "allow br0";
 
   system.stateVersion = "24.05";
 
