@@ -17,7 +17,7 @@
       name = "cheesecraft";
       disk = "/dev/vghm/cheesecraft";
       memorySize = 2048;
-      macAddress = "B7:41:39:68:09:2B";
+      macAddress = "EE:1C:23:84:4E:94";
     }
     {
       name = "petms";
@@ -29,7 +29,7 @@
       name = "joms";
       disk = "/dev/vghm/joms";
       memorySize = 1024;
-      macAddress = "CF:57:FD:74:FC:06";
+      macAddress = "E2:C6:60:F5:83:DA";
     }
   ];
 
