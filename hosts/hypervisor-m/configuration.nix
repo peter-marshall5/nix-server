@@ -59,20 +59,36 @@
     "usb-storage"
     "uas"
     "ahci"
+    "raid1"
+  ];
+
+  boot.kernelModules = [
+    "dm_thin_pool"
+    "kvm_amd"
   ];
 
   # boot.initrd.systemd.enable = lib.mkForce false;
 
   boot.loader.systemd-boot.configurationLimit = 1;
 
+  boot.swraid.enable = true;
+  boot.swraid.mdadmConf = ''
+    PROGRAM=echo
+  '';
+
   fileSystems = {
     "/" = {
       fsType = "btrfs";
-      device = "PARTUUID=3e4e6f59-85de-432f-941a-0963ea0a2105";
+      device = "UUID=25e9f999-cd07-4665-98f5-9aec1da6e5c9";
+      encrypted = {
+        enable = true;
+        label = "root";
+        blkDev = "UUID=3adedd5c-8a8e-4d45-a1f0-ae7c10b115e2";
+      };
     };
     "/boot" = {
       fsType = "vfat";
-      device = "UUID=DDFE-46F7";
+      device = "UUID=FFE8-23CF";
     };
   };
 

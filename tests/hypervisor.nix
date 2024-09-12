@@ -54,7 +54,7 @@
     installBootLoader = true;
   };
   mutableImage = "/tmp/linked-image.qcow2";
-in { inherit diskImage; test = (import ./lib.nix) {
+in (import ./lib.nix) {
 
   name = "hypervisor";
 
@@ -108,4 +108,4 @@ in { inherit diskImage; test = (import ./lib.nix) {
     hypervisor.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil -p 2222 root@127.0.0.1 \"echo -n secret | systemd-creds encrypt -p --name=test --with-key=tpm2 - - > /dev/console\"", timeout=30)
   '';
 
-} { inherit pkgs self; }; }
+} { inherit pkgs self; }

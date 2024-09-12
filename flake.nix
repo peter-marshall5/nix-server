@@ -29,13 +29,9 @@
         ./hosts/hypervisor-m/configuration.nix
       ];
     };
-    checks.x86_64-linux.hypervisor = (import ./tests/hypervisor.nix {
+    checks.x86_64-linux.hypervisor = import ./tests/hypervisor.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
-    }).test;
-    packages.x86_64-linux.test-system = (import ./tests/hypervisor.nix {
-      pkgs = nixpkgs.legacyPackages."x86_64-linux";
-      inherit self;
-    }).diskImage;
+    };
   };
 }
