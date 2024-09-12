@@ -73,7 +73,7 @@ in {
           "-device tpm-tis,tpmdev=tpm0"
         ] ++ lib.optional (guest.disk != null) "-drive if=virtio,format=raw,file=${guest.disk}"
         ++ lib.optionals (guest.macAddress != null) [
-          "-netdev tap,id=net0,br=br0,script=,downscript="
+          "-netdev bridge,id=net0,br=br0"
           "-device virtio-net-pci,romfile=,netdev=net0,mac=${guest.macAddress}"
         ] ++ guest.qemuOptions;
         tpmDir = "/var/lib/vm-guests/${guest.name}/swtpm";

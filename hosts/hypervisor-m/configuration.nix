@@ -115,6 +115,8 @@
     };
   };
 
+  environment.etc."qemu/bridge.conf".text = "";
+
   system.stateVersion = "24.05";
 
 }
