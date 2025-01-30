@@ -1,4 +1,4 @@
-{ pkgs, self }: let
+{ pkgs, self, nixvirt }: let
   inherit (pkgs) lib;
   sshKeys = import (pkgs.path + "/nixos/tests/ssh-keys.nix") pkgs;
   testSystem = import (pkgs.path + "/nixos/lib/eval-config.nix") {
@@ -11,7 +11,9 @@
       }
       {
         services.openssh.enable = true;
+        services.openssh.ports = [ 2222 ];
         users.users.root.openssh.authorizedKeys.keys = [ sshKeys.snakeOilPublicKey ];
+        networking.useDHCP = true;
       }
       {
         # Speeds up the runLinuxInVM invocation in make-disk-image
@@ -61,16 +63,98 @@ in (import ./lib.nix) {
   nodes.hypervisor = { config, ... }: {
     imports = [
       ../modules/virtualisation/vm-guests.nix
+      nixvirt.nixosModules.default
     ];
 
-    virtualisation.vm-guests.guests = [{
-      name = "test";
-      memorySize = 512;
-      qemuOptions = [
-        "-nic user,hostfwd=tcp:127.0.0.1:2222-:22"
-        "-drive if=virtio,format=qcow2,file=/mnt${mutableImage}"
-      ];
-    }];
+    virtualisation.libvirt.enable = true;
+    virtualisation.libvirt.swtpm.enable = true;
+    virtualisation.libvirt.connections."qemu:///system" =
+      {
+        domains =
+          [
+            {
+              definition = let base = nixvirt.lib.domain.templates.linux
+                {
+                  name = "guest";
+                  uuid = "cbac8f2d-5de2-4f76-a9cd-aaa2140cc5ed";
+                  memory = { count = 512; unit = "MiB"; };
+                  network = "default";
+                  storage_vol = "/mnt${mutableImage}";
+                  virtio_video = false;
+                  virtio_net = false;
+                };
+              in nixvirt.lib.domain.writeXML (base // {
+                  devices = base.devices // {
+                    serial =
+                      {
+                        type = "pty";
+                        target =
+                          {
+                            type = "isa-serial";
+                            port = 0;
+                          };
+                      };
+                      tpm =
+                        {
+                          model = "tpm-crb";
+                          backend =
+                            {
+                              type = "emulator";
+                              version = "2.0";
+                            };
+                        };
+                  };
+                  os = base.os // {
+                    loader =
+                      {
+                        readonly = true;
+                        type = "pflash";
+                        path = "${pkgs.OVMF.fd}/FV/OVMF_CODE.fd";
+                        stateless = true;
+                      };
+                  };
+                });
+              active = true;
+            }
+          ];
+        networks =
+          [
+            {
+              definition = nixvirt.lib.network.writeXML
+                {
+                  name = "default";
+                  uuid = "3e126f34-81f9-43f9-a7aa-d13725706d3b";
+                  forward =
+                    {
+                      mode = "nat";
+                      nat =
+                        {
+                          port =
+                            {
+                              start = 1024;
+                              end = 65535;
+                            };
+                        };
+                    };
+                  bridge = { name = "virbr0"; };
+                  ip =
+                    {
+                      address = "192.168.71.1";
+                      netmask = "255.255.255.0";
+                      dhcp =
+                        {
+                          range =
+                            {
+                              start = "192.168.71.2";
+                              end = "192.168.71.2";
+                            };
+                        };
+                    };
+                };
+              active = true;
+            }
+          ];
+      };
 
     # Share the mutable image
     virtualisation.sharedDirectories.tmp = {
@@ -98,14 +182,14 @@ in (import ./lib.nix) {
 
     start_all()
     hypervisor.wait_for_unit("multi-user.target")
-    hypervisor.wait_for_unit("vm-guest@test.service")
+    hypervisor.wait_for_unit("libvirtd.service")
 
-    hypervisor.wait_for_open_port(2222)
+    hypervisor.wait_for_open_port(2222, "192.168.71.2")
     hypervisor.succeed("cat ${sshKeys.snakeOilPrivateKey} > privkey.snakeoil")
     hypervisor.succeed("chmod 600 privkey.snakeoil")
-    hypervisor.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil -p 2222 root@127.0.0.1 true", timeout=30)
+    hypervisor.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil -p 2222 root@192.168.71.2 true", timeout=30)
 
-    hypervisor.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil -p 2222 root@127.0.0.1 \"echo -n secret | systemd-creds encrypt -p --name=test --with-key=tpm2 - - > /dev/console\"", timeout=30)
+    hypervisor.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil -p 2222 root@192.168.71.2 \"echo -n secret | systemd-creds encrypt -p --name=test --with-key=tpm2 - - > /dev/console\"", timeout=30)
   '';
 
 } { inherit pkgs self; }

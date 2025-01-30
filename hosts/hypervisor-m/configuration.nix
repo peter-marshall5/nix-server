@@ -3,7 +3,6 @@
   nixpkgs.hostPlatform = "x86_64-linux";
 
   imports = [
-    ../../modules/virtualisation/vm-guests.nix
     ../../modules/profiles/base.nix
   ];
 
@@ -12,31 +11,20 @@
 
   networking.hostName = "hypervisor-m";
 
-  virtualisation.vm-guests.guests = [
-    {
-      name = "cheesecraft";
-      disk = "/dev/vghm/cheesecraft";
-      memorySize = 2048;
-      macAddress = "EE:1C:23:84:4E:94";
-    }
-    {
-      name = "petms";
-      disk = "/dev/vghm/petms";
-      memorySize = 1024;
-      macAddress = "EE:5E:65:D4:53:D4";
-    }
-    {
-      name = "joms";
-      disk = "/dev/vghm/joms";
-      memorySize = 1024;
-      macAddress = "E2:C6:60:F5:83:DA";
-    }
-  ];
-
-  users.users.root = {
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjg1Y1b2YyhoC73I4is0/NRmVb3FeRmpLf2Yk8adrxq petms@peter-pc"
-    ];
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true;
+      swtpm.enable = true;
+      ovmf = {
+        enable = true;
+        packages = [(pkgs.OVMF.override {
+          secureBoot = true;
+          tpmSupport = true;
+        }).fd];
+      };
+    };
   };
 
   users.allowNoPasswordLogin = true;
@@ -67,10 +55,6 @@
     "kvm_amd"
   ];
 
-  # boot.initrd.systemd.enable = lib.mkForce false;
-
-  boot.loader.systemd-boot.configurationLimit = 1;
-
   boot.swraid.enable = true;
   boot.swraid.mdadmConf = ''
     PROGRAM=echo
@@ -91,31 +75,6 @@
       device = "UUID=FFE8-23CF";
     };
   };
-
-  systemd.targets."tpm2".enable = false;
-
-  systemd.network.netdevs."10-br0" = {
-    netdevConfig = {
-      Name = "br0";
-      Kind = "bridge";
-    };
-  };
-
-  systemd.network.networks."10-br0-eth" = {
-    matchConfig.Name = "en*";
-    networkConfig = {
-      Bridge = "br0";
-    };
-  };
-
-  systemd.network.networks."11-br0" = {
-    matchConfig.Name = "br0";
-    networkConfig = {
-      DHCP = "yes";
-    };
-  };
-
-  environment.etc."qemu/bridge.conf".text = "allow br0";
 
   system.stateVersion = "24.05";
 
